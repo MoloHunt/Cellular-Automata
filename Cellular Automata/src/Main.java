@@ -61,7 +61,7 @@ public class Main extends Canvas {
         long lastTime = System.nanoTime();
         long timer = System.currentTimeMillis();
         long timer2 = System.currentTimeMillis();
-        final double ns = 1000000000.0 / 15.0;
+        final double ns = 1000000000.0 / 30.0; //runs at 30 frames per second, this is really all that is needed for catching inputs from the user
         double delta = 0;
         int frames = 0;
         int ticks = 0;
@@ -72,19 +72,17 @@ public class Main extends Canvas {
             delta += (now-lastTime) / ns;
             lastTime = now;
 
-            while(delta >= 1){
+            while(delta >= 1) {
                 Update();
                 ticks++;
                 delta--;
             }
-            Render();
-            frames++;
+            //Render was here, now is removed as it can only be called when the Cellularsimulator needs to be update graphically
 
             if((System.currentTimeMillis() - timer) > 1000){
                 timer += 1000;
-                System.out.printf("tps: %d || fps: %d\n", ticks, frames); //Prints out the ticks per second (tps) and the frames per second (fps)
+                System.out.printf("tps: %d", ticks); //Prints out the ticks per second (tps) //Used to print frames per second, but now the program only renders when it is necessary
                 ticks = 0;
-                frames = 0;
             }
 
             //This timer "fires" off every 2 seconds just to give some delay between smoothing iterations
@@ -105,6 +103,7 @@ public class Main extends Canvas {
 
         if(key.keys[KeyEvent.VK_SPACE]){ //Press SPACE to toggle between simulating and not simulating
             cells.TogglePlay();
+            frame.setTitle(cells.play + " :: " + cells.seed); //Dynamically change the window title, only when space is pressed
         }
 
         if(key.keys[KeyEvent.VK_C]){ //If you press C it starts a customisation process
@@ -115,31 +114,42 @@ public class Main extends Canvas {
             cells.Restart();
         }
 
-        frame.setTitle(cells.play + " :: " + cells.seed); //Dynamically change the window title
+        //Widnow title changin used to be here, now is only called if the user presses space and changes the state of cells.play
+
+        //now Render is only Called when the grid needs updating graphically
+        if(cells.needRender){
+            Render();
+        }
 
 
-        //Complex set of code that allows you to save out the results of the program
         if(cells.done){
-            int reply = JOptionPane.showConfirmDialog(null, "Simulation Finished, would you like to save?", "SIMULATION FINISHED", JOptionPane.YES_NO_OPTION); //Option panel that takes asks if you want to save
-            if(reply == JOptionPane.YES_OPTION){//if you do want to save
-                JFileChooser fc = new JFileChooser();
-                if(fc.showSaveDialog(fc) == JFileChooser.APPROVE_OPTION){ //opens file browser for you to select a destination for the file
-                    File file = fc.getSelectedFile();
-                    Container c = frame.getContentPane();
-                    BufferedImage im = new BufferedImage(c.getWidth(), c.getHeight(), BufferedImage.TYPE_INT_ARGB); //creates an image the size of the canvas
-                    Graphics2D g2d = im.createGraphics();
-                    cells.Render(g2d); //renders the CellularSimulator to the imaghe instead of the canvas
-                    try {
-                        ImageIO.write(im, "PNG", file);
-                        System.exit(0); //writes the image to a file and then quits
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        System.exit(0); //if that fails the program will quit
-                    }
+            SaveImage();
+        }
+    }
+
+    //Save Image
+    //Complex set of code that allows you to save out the results of the program
+    //moved from the update loop to make it look neater
+    private void SaveImage() {
+        int reply = JOptionPane.showConfirmDialog(null, "Simulation Finished, would you like to save?", "SIMULATION FINISHED", JOptionPane.YES_NO_OPTION); //Option panel that takes asks if you want to save
+        if(reply == JOptionPane.YES_OPTION){//if you do want to save
+            JFileChooser fc = new JFileChooser();
+            if(fc.showSaveDialog(fc) == JFileChooser.APPROVE_OPTION){ //opens file browser for you to select a destination for the file
+                File file = fc.getSelectedFile();
+                Container c = frame.getContentPane();
+                BufferedImage im = new BufferedImage(c.getWidth(), c.getHeight(), BufferedImage.TYPE_INT_ARGB); //creates an image the size of the canvas
+                Graphics2D g2d = im.createGraphics();
+                cells.Render(g2d); //renders the CellularSimulator to the imaghe instead of the canvas
+                try {
+                    ImageIO.write(im, "PNG", file);
+                    System.exit(0); //writes the image to a file and then quits
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    System.exit(0); //if that fails the program will quit
                 }
-            }else{
-                System.exit(0);//if you don't want to save the program quits
             }
+        }else{
+            System.exit(0);//if you don't want to save the program quits
         }
     }
 

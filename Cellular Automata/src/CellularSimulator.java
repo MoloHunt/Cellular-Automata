@@ -24,6 +24,8 @@ public class CellularSimulator {
     public boolean play = false; //whether the program should be simulating or not
     public boolean done = false; //whether the simulation has finished
 
+    public boolean needRender; //Controls whether Render is run in the main class
+
     //One version of the constructor that doesn't have a custom fill Percent
     public CellularSimulator(int w, int h, int mS, int scale){
         width = w;
@@ -70,6 +72,7 @@ public class CellularSimulator {
                 }
             }
         }
+        needRender = true; //So that the initial grid is rendered
     }
     
     //This just calls Smooth if we are still below the maxSmooths and we are simulating
@@ -98,6 +101,7 @@ public class CellularSimulator {
                 }
             }
         }
+        needRender = true; //the grid has been changed so it needs to be re rendered
     }
 
     //This counts how many squares around a given square are filled
@@ -147,5 +151,6 @@ public class CellularSimulator {
                 g2.fillRect(x * scalesize, y * scalesize, scalesize, scalesize); //draws the cell in the right place and the right size
             }
         }
+        needRender = false;
     }
 }
