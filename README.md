@@ -10,4 +10,4 @@ Once the program has run through to completion it will ask if you want to save t
 TODO
 ====
 
-Comment the program, and neaten up some of the code, it is fairly illegible at the moment
+Look into optimizing the code, the grid only needs to be rendered if it changes, which doesn't happen every frame
